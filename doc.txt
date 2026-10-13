@@ -1,0 +1,37 @@
+son du piano -> récupérer les notes jouées (via spectrogramme) -> transformer en données -> lire le fichier
+
+Archi:
+mode encodage = Fichier source -> Données (Bin/Hex) -> Spectrogramme -> Fichier Audio (Wav)
+mode décodage = Fichier Audio/Vidéo -> Spectrogramme -> Analyse des fréquences -> Données (Bin/Hex) -> Fichier de sortie
+
+Pour encodage (tout les fichiers sont des unsigned char)
+ouvrir le fichier avec fopen(chemin, "rb"), lire les octets
+Si biniare, convertir les octets en 8bits
+Si hexa, un octet devient 2 val en hexa
+
+Spectrogramme:
+représentation temps en abs et fréquences en ord ->associer des données à des freq précises
+Définir des fréquences distintes, chaque fréquences représente 1 bit.
+S'il est à 1, jouer onde sinusoidale pendant X ms, sinon rien
+Faire un fichier Wav pour éviter les compressions et codecs de mp3/4
+
+Décodage:
+à partir de l'audio, retrouver les fréquences à chaque instant
+FFT -> transformer une signal temporel en donné fréquencielle (implémentation avec FFTW ou STFT)
+en analysant les pics tout les X ms, le prog va détecter les fréquences actives
+
+Q:
+Voici 3 fichiers en C. Dans l'ensemble ce sont des programmes qui permettent l'encodage et le décodage de fichier via des fichiers audio Wav
+
+Enco.c permet d'encoder un fichier en fonction de plusieurs paramètres (certains optionnels): la durée d'un bloc (en ms), le nombre de référence qui détermine les fréquence pour encoder, la forme de l'onde, et optionnel: un mdp pour l'encodage; et s'il l'utilisateur active le mot de passe (le programme le lui demande), le programme propose le mode strict qui permet d'encoder en plus avec le type d'onde et le numéro de référence.
+
+Conv.c permet de convertir un fichier de musique Wav en un autre fichier Wav. Le fichier Wav obtenu par ce programme correspond soit à l'onde sinusoidale, soit onde carré.
+
+Deco.c permet de décoder un fichier Wav en 2 modes différents. Soit le mode classique (le fichier Wav à été obtenu par Enco.c), où le programme demande les infos du fichiers, comme s'il contient un mdp ou non, (et si oui, mode strict ou non), la taille du bloc, le numéro de référence, type onde, affichage des données etc... Et à la fin de ce mode, on doit obtenir le fichier de base qui à été fourni à l'encodeur (ou plus ou moins, si l'utilisateur n'a pas mis de mdp et que les infos fournis sont approximatif, le fichier peut etre reconstruits partiellement). Soit le mode expérimentale, qui correspond au décodage d'un fichier Wav obtenu à partir de Conv.c. Dans ce cas le programme ne demande pas la taille d'un bloc (vu que c'est toujours 23 je crois), et l'utilisateur selectionne l'onde qui à servis à la convertion (sinus ou carré), et le programme essaye de reconstruire un fichier txt exploitable, soit une image bmp non corrompu.
+
+Enco.c et Deco.c en plus de générer des fichiers Wav, genère un fichier txt contenant les infos.
+
+
+
+Modifie les programmes car j'ai essayé d'encodé un fichier puis de le décodé, mais ca n'a pas fonctionné. Fix donc tout les problèmes et rajoutes des trucs si tu vois qu'il manque des chose 
+
